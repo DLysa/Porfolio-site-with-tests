@@ -1,0 +1,6 @@
+{
+  "status": "Failed",
+  "output": "cypress example failed",
+  "icon": "typescript",
+  "fileExt": "ts"
+}

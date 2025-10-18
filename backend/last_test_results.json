@@ -1,0 +1,17 @@
+{
+  "api": {
+    "status": "Passed",
+    "display": "Passed 20/20",
+    "elapsed": 5.83
+  },
+  "selenium": {
+    "status": "Passed",
+    "display": "Passed 6/6",
+    "elapsed": 30.61
+  },
+  "cypress": {
+    "status": "Passed",
+    "display": "Passed 8/8",
+    "elapsed": 23.82
+  }
+}

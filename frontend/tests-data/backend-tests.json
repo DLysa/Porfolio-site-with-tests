@@ -1,0 +1,6 @@
+{
+  "status": "Passed",
+  "output": "test_health() - ok\\ntest_add_item() - ok",
+  "icon": "python",
+  "fileExt": "java"
+}
