@@ -14,7 +14,7 @@ CORS(app, origins="*")
 RESULTS_FILE = "last_test_results.json"
 BASE_BACKEND = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_BACKEND.parent
-SITE_DIR = PROJECT_ROOT / "site"
+SITE_DIR = PROJECT_ROOT
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 # --- Test files ---
@@ -72,7 +72,7 @@ def serve_frontend(filename):
         return send_from_directory(str(FRONTEND_DIR), filename)
     return jsonify({"error": "not found"}), 404
 
-@app.route("/site/<path:filename>")
+@app.route("/<path:filename>")
 def serve_site(filename):
     f = SITE_DIR / filename
     if f.exists():
@@ -137,30 +137,57 @@ def run_test(which):
     which = which.lower()
     start_time = time.time()
 
+    # Pobranie domeny API z zapytania (jeśli wysłane z frontendu) lub fallback
+    api_base = request.json.get("api_base") if request.is_json else None
+    if not api_base:
+        api_base = "http://localhost:5000"  # domyślna wartość fallback
+
+    # Ścieżki względne względem projektu
     if which == "api":
+        mvn_cmd = "mvn"  # zakładam, że mvn jest w PATH serwera Linux
+        test_path = PROJECT_ROOT / "backend" / "tests"
         cmd = [
-            r"C:\tools\apache-maven-3.9.9\bin\mvn.cmd",
-            "-Dapi.base=http://localhost",
-            "-Dapi.port=5000",
+            mvn_cmd,
+            f"-Dapi.base={api_base}",
             "-Dtest=com.portfolio.ApiTests",
-            "clean", "test"
+            "clean",
+            "test"
         ]
-        cwd = r"C:\Users\Domek\Downloads\portfolio-test-site\backend\tests"
     elif which == "selenium":
         install_requirements()
-        cmd = [sys.executable, "-m", "pytest", "test_ui.py", "-v"]
-        cwd = r"C:\Users\Domek\Downloads\portfolio-test-site\tests_selenium"
+        test_path = PROJECT_ROOT / "tests_selenium"
+        cmd = [
+            sys.executable,
+            "-m",
+            "pytest",
+            "test_ui.py",
+            "-v",
+            "--headless"
+        ]
     elif which == "cypress":
-        cmd = ["npx", "cypress", "run", "--spec", "cypress/e2e/cypress_test.ts"]
-        cwd = r"C:\Users\Domek\Downloads\portfolio-test-site"
+        test_path = PROJECT_ROOT
+        cmd = [
+            "npx",
+            "cypress",
+            "run",
+            "--spec",
+            "cypress/e2e/cypress_test.ts",
+            "--headless"
+        ]
     else:
         return jsonify({"status": "unknown test type"}), 404
 
     try:
         result = subprocess.run(
-            cmd, cwd=cwd, capture_output=True, text=True, shell=True,
-            encoding="utf-8", errors="replace"
+            cmd,
+            cwd=str(test_path),
+            capture_output=True,
+            text=True,
+            shell=False,  # bez shell=True dla bezpieczeństwa
+            encoding="utf-8",
+            errors="replace"
         )
+
         duration = round(time.time() - start_time, 2)
         status = "Passed" if result.returncode == 0 else "Failed"
         display = f"Passed {DISPLAY_COUNTS.get(which, '')}" if status.lower() == "passed" else status
@@ -179,6 +206,7 @@ def run_test(which):
         last_test_results[which] = {"status": "Error", "display": "Error", "elapsed": None}
         save_results()
         return jsonify({"status": "Error", "display": "Error", "error": str(e)}), 500
+
 
 # --- Test progress (dummy, for compatibility) ---
 test_progress = {k: {"total": 0, "done": 0} for k in ["api", "selenium", "cypress"]}

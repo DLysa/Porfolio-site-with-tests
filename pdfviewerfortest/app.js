@@ -85,7 +85,7 @@ async function loadTest(type) {
   // dezaktywacja przycisku rerun
   rerunBtn.disabled = true;
   rerunBtn.classList.add('opacity-50', 'cursor-not-allowed');
-  rerunBtn.textContent = 'Retest niedostępny 🔒';
+  rerunBtn.textContent = 'Retest niedostępny';
 
   // Mockowane dane wyników testów
   const mockData = {
