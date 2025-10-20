@@ -137,10 +137,23 @@ def run_test(which):
     which = which.lower()
     start_time = time.time()
 
-    # Pobranie domeny API z zapytania (jeśli wysłane z frontendu) lub fallback
-    api_base = request.json.get("api_base") if request.is_json else None
+    # --- Dynamiczne ustalanie domeny API ---
+    api_base = None
+
+    # 1️⃣ Jeśli frontend wysłał wartość api_base w JSON
+    if request.is_json:
+        api_base = request.json.get("api_base")
+
+    # 2️⃣ Jeśli brak, spróbuj pobrać z samego requestu (np. https://moja-domena.pl)
     if not api_base:
-        api_base = "http://localhost:5000"  # domyślna wartość fallback
+        api_base = request.host_url.rstrip("/")
+
+    # 3️⃣ Ostateczny fallback
+    if not api_base:
+        api_base = "http://localhost:5000"
+
+    print(f"[run_test] Using API base: {api_base}")
+
 
     # Ścieżki względne względem projektu
     if which == "api":
