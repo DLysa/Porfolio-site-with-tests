@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="api-base" content="https://dominik-lysak.ddns.net">
   <title>PDF Viewer</title>
+
+  <!-- Favicon -->
   <link rel="icon" href='data:image/svg+xml;utf8,
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
@@ -14,91 +16,119 @@
       <stop offset="100%" stop-color="%23FF4D5A"/>
     </linearGradient>
   </defs>
-  <!-- Maksymalnie duża lupa -->
   <circle cx="28" cy="28" r="18" stroke="url(%23gradCape1)" stroke-width="6" fill="none"/>
   <line x1="38" y1="38" x2="52" y2="52" stroke="url(%23gradCape1)" stroke-width="6" stroke-linecap="round"/>
 </svg>'
   >
 
-
-
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: 'class' };</script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: '#ff4d5a',
+            accentBlue: '#51A2E9',
+            accentPurple: '#A878A2',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    #toggle-theme:hover {
+      box-shadow: 0 0 25px rgba(255, 77, 90, 0.7);
+      transform: scale(1.05);
+    }
+
+    #toggle-theme:active {
+      transform: scale(0.97);
+    }
+  </style>
+
+  <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
 </head>
+
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen relative overflow-hidden">
 
 <!-- LEWA STRONA – PDF Viewer -->
-<div id="pdf-container" class="flex h-screen w-[calc(100%-min(50%,505px))] border-r border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-hidden">
+<div id="pdf-container"
+     class="flex h-screen w-[calc(100%-min(50%,505px))] border-r border-gray-300 dark:border-gray-800 bg-gray-200 dark:bg-gray-900 overflow-hidden shadow-inner">
 
   <!-- Miniaturki -->
-  <div id="pdf-thumbnails" class="flex flex-col items-center py-2 px-1 bg-gray-100 dark:bg-gray-900 overflow-y-auto gap-2 w-20 border-r border-gray-300 dark:border-gray-700 flex-shrink-0"></div>
+  <div id="pdf-thumbnails"
+       class="flex flex-col items-center py-2 px-1 bg-gray-100 dark:bg-gray-800 overflow-y-auto gap-2 w-20 border-r border-gray-300 dark:border-gray-700 flex-shrink-0"></div>
 
-  <div class="flex-1 flex flex-col items-center justify-start p-2">
-    <div class="flex items-center justify-start gap-2 w-full mb-2">
-      <h2 class="text-lg font-bold text-blue-500">📄 PDF Viewer</h2>
+  <div class="flex-1 flex flex-col items-center justify-start p-3">
+    <div class="flex items-center justify-start gap-3 w-full mb-2">
+      <h2 class="text-lg font-bold bg-gradient-to-r from-accentBlue via-accentPurple to-accent bg-clip-text text-transparent">
+        📄 PDF Viewer
+      </h2>
 
       <!-- Panel przycisków -->
       <div class="flex flex-wrap items-center gap-2 ml-auto text-sm">
-        <button id="zoom-out" class="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">−</button>
-        <span id="zoom-level" class="font-semibold w-14 text-center">100%</span>
-        <button id="zoom-in" class="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">+</button>
-        <button id="reset-zoom" class="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Reset</button>
-        <button id="fit-width" class="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700" title="Dopasuj szerokość">↔</button>
-        <button id="fit-height" class="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700" title="Dopasuj wysokość">↕</button>
+        <button id="zoom-out" class="px-2 py-1 rounded bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200 hover:bg-accent transition shadow-md">−</button>
+        <span id="zoom-level" class="font-semibold w-14 text-center text-accentBlue">100%</span>
+        <button id="zoom-in" class="px-2 py-1 rounded bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200 hover:bg-accent transition shadow-md">+</button>
+        <button id="reset-zoom" class="px-2 py-1 rounded- bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200 hover:bg-accent transition shadow-md">Reset</button>
+        <button id="fit-width" class="px-2 py-1 rounded bg-gradient-to-r from-accentBlue to-accentPurple text-white hover:scale-105 transition">↔</button>
+        <button id="fit-height" class="px-2 py-1 rounded bg-gradient-to-r from-accentPurple to-accent text-white hover:scale-105 transition">↕</button>
         <input type="file" id="file-input" accept="application/pdf" class="hidden">
-        <button id="open-file" class="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700">📂 Otwórz PDF</button>
-        <a id="download" href="./cv.pdf" download class="px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">💾 Pobierz PDF</a>
+        <button id="open-file" class="px-2 py-1 rounded bg-accent text-white hover:bg-accent/80 shadow-lg">📂 Otwórz PDF</button>
+        <a id="download" href="./cv.pdf" download class="px-2 py-1 rounded bg-accentBlue text-white hover:bg-accentBlue/80 shadow-lg">💾 Pobierz PDF</a>
       </div>
     </div>
 
     <!-- Obszar PDF -->
     <div id="pdf-view" class="flex-1 relative overflow-auto flex flex-col items-center gap-4 w-full cursor-default"></div>
-    <p id="pdf-error" class="text-red-500 mt-2 hidden"></p>
+    <p id="pdf-error" class="text-accent mt-2 hidden"></p>
   </div>
 </div>
 
-<!-- Toast powiadomień (domyślnie ukryty) -->
-<div id="pdf-toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-    bg-gray-700 text-white font-bold px-4 py-2 rounded shadow-lg text-center z-50
-    opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2">
+<!-- Toast -->
+<div id="pdf-toast"
+     class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+    bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold px-4 py-2 rounded-xl shadow-lg text-center z-50
+    opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 border border-accent">
 </div>
-
-
 
 <!-- === RIGHT SIDE: TEST PANEL === -->
 <div id="test-panel"
-     class="fixed top-0 right-0 h-full w-1/2 max-w-lg bg-gray-50 dark:bg-gray-800 shadow-xl shadow-black/30 transform translate-x-0 transition-transform duration-300 flex flex-col z-50">
+     class="fixed top-0 right-0 h-full w-1/2 max-w-lg bg-gray-200 dark:bg-gray-900 shadow-xl shadow-black/40 transform translate-x-0 transition-transform duration-300 flex flex-col z-50">
 
-  <!-- Toggle handle
-  <button id="toggle-panel"
-          class="absolute left-[-40px] top-1/2 transform -translate-y-1/2 w-12 h-24 bg-blue-500 text-white rounded-l-full flex items-center justify-center shadow-lg text-2xl hover:bg-blue-600 transition-transform transition-colors z-50"
-          aria-label="Toggle panel">
-    &#x276F;
-  </button>-->
+
+  <!-- Informacja o stanie testów -->
+  <div class="absolute top-1 left-4 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1 rounded border border-gray-400 dark:border-gray-600 text-xs font-medium shadow-sm">
+    ⚠️ Testy w fazie refaktoryzacji – nie są ustrukturyzowane ani zgodne ze standardami
+  </div>
 
   <!-- Content -->
   <div class="p-4 mt-4 flex flex-col h-full">
-    <p>API Status: <span id="status" data-testid="status">?</span></p>
+    <p>API Status: <span id="status" data-testid="status" class="text-accent">?</span></p>
 
     <!-- Tabs -->
-    <div class="mb-2 flex space-x-2">
-      <button class="tab-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white rounded transition transform hover:scale-105"
-              data-type="api" title="API (Java)">
+    <div class="mb-3 flex space-x-2">
+      <button class="tab-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-accentBlue to-accentPurple text-white transition hover:scale-105"
+              data-type="api">
         <div class="p-1 rounded bg-white/20 shadow-md">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" class="w-6 h-6">
         </div><span class="hidden sm:inline">API</span>
       </button>
 
-      <button class="tab-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white rounded transition transform hover:scale-105"
-              data-type="selenium" title="Selenium (Python)">
+      <button class="tab-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-accentPurple to-accent text-white transition hover:scale-105"
+              data-type="selenium">
         <div class="p-1 rounded bg-white/20 shadow-md">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" class="w-6 h-6">
         </div><span class="hidden sm:inline">Selenium</span>
       </button>
 
-      <button class="tab-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white rounded transition transform hover:scale-105"
-              data-type="cypress" title="Cypress (TypeScript)">
+      <button class="tab-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-gradient-to-r from-accent to-accentBlue text-white transition hover:scale-105"
+              data-type="cypress">
         <div class="p-1 rounded bg-white/20 shadow-md">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" class="w-6 h-6">
         </div><span class="hidden sm:inline">Cypress</span>
@@ -106,19 +136,22 @@
     </div>
 
     <button id="rerun-test"
-            class="px-2 py-1 bg-blue-400 hover:bg-blue-500 text-white rounded text-sm shadow-sm transition-colors">
+            class="px-2 py-1 bg-accentBlue hover:bg-accentPurple text-white rounded-md text-sm shadow-md transition-all">
       Rerun Test!
     </button>
 
-    <div id="test-status"
-         class="mb-2 p-2 rounded font-bold text-center transition-colors"></div>
+    <div id="test-status" class="mb-2 p-2 rounded font-bold text-center transition-colors text-accent"></div>
 
     <pre id="test-code"
-         class="flex-1 overflow-auto p-3 bg-white dark:bg-gray-700 rounded text-sm whitespace-pre-wrap"></pre>
+         class="flex-1 overflow-auto p-3 bg-gray-100 dark:bg-gray-800 rounded text-sm whitespace-pre-wrap border border-gray-300 dark:border-gray-700"></pre>
   </div>
 </div>
 
-<button id="toggle-theme" class="fixed left-4 bottom-4 px-4 py-2 bg-blue-500 text-white rounded-2xl shadow-lg z-50">Dark/Light</button>
+<!-- Dark/Light Toggle -->
+<button id="toggle-theme"
+        class="fixed left-4 bottom-4 px-4 py-2 bg-gradient-to-r from-accentBlue to-accent text-white rounded-full shadow-lg hover:scale-105 transition z-50">
+  Dark/Light
+</button>
 
 
 <!-- PDF + Miniatures + Zoom + Open File -->
@@ -318,6 +351,9 @@
   window.addEventListener('DOMContentLoaded', ()=>{
     loadPDF(defaultPDF); // najprostszy i pewny sposób – wszystkie strony wczytane
   });
+
+
+
 </script>
 
 
